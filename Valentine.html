@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine? 💖</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+        const { motion, AnimatePresence } = Motion;
+
+        function ValentineProposal() {
+            const [accepted, setAccepted] = useState(false);
+            const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
+            const noButtonRef = useRef(null);
+
+            // Handle NO button evasion
+            const handleNoHover = () => {
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Generate random position, ensuring button stays within viewport
+                const maxX = viewportWidth - 200;
+                const maxY = viewportHeight - 100;
+                
+                const newX = Math.random() * maxX - maxX / 2;
+                const newY = Math.random() * maxY - maxY / 2;
+                
+                setNoButtonPosition({ x: newX, y: newY });
+            };
+
+            // Handle YES button click
+            const handleYesClick = () => {
+                setAccepted(true);
+            };
+
+            // Floating hearts animation variants
+            const heartVariants = {
+                float: (i) => ({
+                    y: [0, -400],
+                    x: [0, (i % 2 === 0 ? 50 : -50)],
+                    opacity: [0, 1, 0],
+                    transition: {
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: i * 0.4,
+                        ease: "easeOut"
+                    }
+                })
+            };
+
+            // Rose animation variants
+            const roseVariants = {
+                bloom: (i) => ({
+                    scale: [0, 1],
+                    rotate: [0, 360],
+                    opacity: [0, 1],
+                    transition: {
+                        duration: 1,
+                        delay: i * 0.2,
+                        ease: "backOut"
+                    }
+                })
+            };
+
+            // Ring animation variants
+            const ringVariants = {
+                spin: {
+                    rotate: 360,
+                    scale: [1, 1.2, 1],
+                    transition: {
+                        rotate: {
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "linear"
+                        },
+                        scale: {
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }
+                    }
+                }
+            };
+
+            return (
+                <div className="min-h-screen w-full bg-gradient-to-br from-pink-100 via-rose-50 to-red-100 overflow-hidden relative flex items-center justify-center">
+                    
+                    {/* Animated background hearts */}
+                    {!accepted && (
+                        <div className="absolute inset-0 pointer-events-none">
+                            {[...Array(8)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    custom={i}
+                                    variants={heartVariants}
+                                    animate="float"
+                                    className="absolute text-4xl"
+                                    style={{
+                                        left: `${10 + i * 12}%`,
+                                        bottom: 0
+                                    }}
+                                >
+                                    💕
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+
+                    <AnimatePresence mode="wait">
+                        {!accepted ? (
+                            // Proposal Screen
+                            <motion.div
+                                key="proposal"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="text-center z-10 px-4"
+                            >
+                                {/* Main Question */}
+                                <motion.h1
+                                    initial={{ y: -50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+                                    className="text-5xl md:text-7xl font-bold text-rose-600 mb-4"
+                                >
+                                    Will you be my
+                                </motion.h1>
+                                <motion.h1
+                                    initial={{ y: -50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+                                    className="text-6xl md:text-8xl font-bold text-red-500 mb-12"
+                                >
+                                    Valentine? 💖
+                                </motion.h1>
+
+                                {/* Buttons Container */}
+                                <div className="flex gap-6 justify-center items-center relative h-24">
+                                    {/* YES Button - Always clickable */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleYesClick}
+                                        className="px-12 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-2xl font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                                    >
+                                        YES 💝
+                                    </motion.button>
+
+                                    {/* NO Button - Evasive */}
+                                    <motion.button
+                                        ref={noButtonRef}
+                                        animate={{
+                                            x: noButtonPosition.x,
+                                            y: noButtonPosition.y
+                                        }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 500,
+                                            damping: 20
+                                        }}
+                                        onMouseEnter={handleNoHover}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleNoHover();
+                                        }}
+                                        className="px-12 py-4 bg-gray-300 text-gray-600 text-2xl font-bold rounded-full shadow-lg cursor-pointer select-none"
+                                    >
+                                        NO 😢
+                                    </motion.button>
+                                </div>
+
+                                {/* Hint text */}
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 1 }}
+                                    className="mt-8 text-rose-400 text-sm italic"
+                                >
+                                    (Try clicking "NO" if you dare... 😏)
+                                </motion.p>
+                            </motion.div>
+                        ) : (
+                            // Celebration Screen
+                            <motion.div
+                                key="celebration"
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, type: "spring" }}
+                                className="text-center z-10 relative"
+                            >
+                                {/* I LOVE YOU Text */}
+                                <motion.h1
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                                    className="text-7xl md:text-9xl font-bold bg-gradient-to-r from-red-600 via-pink-500 to-red-600 bg-clip-text text-transparent mb-8"
+                                >
+                                    I LOVE YOU RACHAEL
+                                </motion.h1>
+
+                                {/* Floating Roses */}
+                                <div className="absolute inset-0 pointer-events-none">
+                                    {[...Array(6)].map((_, i) => (
+                                        <motion.div
+                                            key={`rose-${i}`}
+                                            custom={i}
+                                            variants={roseVariants}
+                                            initial="hidden"
+                                            animate="bloom"
+                                            className="absolute text-6xl"
+                                            style={{
+                                                left: `${15 + i * 15}%`,
+                                                top: `${20 + (i % 3) * 25}%`
+                                            }}
+                                        >
+                                            🌹
+                                        </motion.div>
+                                    ))}
+                                </div>
+
+                                {/* Spinning Rings */}
+                                <motion.div
+                                    variants={ringVariants}
+                                    animate="spin"
+                                    className="text-8xl mb-8"
+                                >
+                                    💍
+                                </motion.div>
+                                
+                                {/* Floating hearts celebration */}
+                                <div className="absolute inset-0 pointer-events-none">
+                                    {[...Array(20)].map((_, i) => (
+                                        <motion.div
+                                            key={`heart-${i}`}
+                                            custom={i}
+                                            variants={heartVariants}
+                                            animate="float"
+                                            className="absolute text-3xl"
+                                            style={{
+                                                left: `${i * 5}%`,
+                                                bottom: 0
+                                            }}
+                                        >
+                                            {i % 3 === 0 ? '❤️' : i % 3 === 1 ? '💕' : '💖'}
+                                        </motion.div>
+                                    ))}
+                                </div>
+
+                                {/* Additional celebration message */}
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1 }}
+                                    className="text-2xl md:text-3xl text-rose-600 font-semibold mt-8"
+                                >
+                                    Forever and always 💕✨
+                                </motion.p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ValentineProposal />);
+    </script>
+</body>
+</html>
